@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Genre Classifier</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .sample-lyrics {
+            margin-bottom: 10px;
+        }
+        #genre-icon {
+            font-size: 3rem;
+            margin: 10px 0;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
+        }
+        .badge {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Music Genre Classifier</a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <header class="text-center my-3">
+            <h1>Music Genre Classifier</h1>
+            <p class="lead">Paste song lyrics to predict the music genre using machine learning</p>
+        </header>
+        
+        <div class="row">
+            <!-- Input Lyrics Section (Left) -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5>Input Lyrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="classify-form">
+                            <div class="mb-3">
+                                <label for="lyrics" class="form-label">Song Lyrics:</label>
+                                <textarea class="form-control" id="lyrics" name="lyrics" rows="4" placeholder="Paste song lyrics here..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Release Year (optional):</label>
+                                <input type="number" class="form-control" id="year" name="year" min="1900" max="2030" value="2025">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Classify Genre</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- How It Works Section (moved to bottom of left column) -->
+                <div class="card shadow-sm" id="how-it-works-card">
+                    <div class="card-header">
+                        <h5>How It Works <span class="text-muted small">(Click for details)</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <p>This Music Genre Classifier uses machine learning to analyze song lyrics and predict their genre. The system:</p>
+                        <ol>
+                            <li>Takes your input lyrics and preprocesses them</li>
+                            <li>Extracts key features using natural language processing</li>
+                            <li>Runs the processed lyrics through multiple ML models</li>
+                            <li>Combines model predictions for the final classification</li>
+                        </ol>
+                        <p class="text-muted">Built with PySpark ML and trained on the Mendeley music dataset with 7 genres.</p>
+                        <p><a href="#" id="learn-more-link">Learn more</a> about how the classification works.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sample Lyrics, Results & Chart -->
+            <div class="col-md-6">
+                <!-- Sample Lyrics Section (moved to right top) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5>Try These Sample Lyrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="I feel the rhythm in my soul as I dance through the night with stars above. The beat is infectious, can't stop moving to this melody. Your love is like a sweet harmony, playing on repeat in my mind. Take my hand and we'll dance until dawn breaks.">Pop Sample 🎤</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="Broken hearts and whiskey, driving down these country roads thinking of you. My old pickup truck and guitar are all I need, watching the sunset over corn fields. Small town girl with big dreams, missing home when I'm away. The sound of fiddles reminds me of simpler times.">Country Sample 🤠</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="The beat drops hard, I'm spitting rhymes in the cipher, mic check one two. Started from the bottom now we're here, hustling every day on these streets. Flow so smooth like water, words cut like a knife. Rep my city till the day I die, keeping it real.">Hip Hop Sample 🎧</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="Swinging notes and saxophone, the band plays jazz until dawn breaks through. Smooth like butter, improvising through the night in this smoky club. The piano keys dance under skilled fingers, bass walking steadily beneath. Lost in the moment of pure musical expression.">Jazz Sample 🎷</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="I got the blues in my heart, guitar crying with me all night long. Woke up this morning, my baby was gone, nothing but heartache remains. These twelve bars tell my story of pain and struggle. The whiskey doesn't help but the music soothes my soul.">Blues Sample 🎺</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="Rock and roll all night, guitar solos blazing as the crowd goes wild. The lights flash bright as the drums pound, adrenaline rushing through my veins. The power chords ring out as we headbang in unison, lost in the sound of distorted guitars.">Rock Sample 🎸</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="One love, one heart, let's get together and feel all right. The sun is shining and the rhythms keep flowing. Island vibes and positive messages, swaying to the beat. Roots, rock, reggae music playing while we dance under palm trees.">Reggae Sample 🌴</button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-outline-primary w-100 sample-lyrics" data-lyrics="burning sensation rising temperature increasing heat growing warmth spreading fire extending flame expanding blaze enlarging inferno broadening conflagration widening combustion heightening fervor intensifying passion deepening ardor strengthening devotion reinforcing dedication hardening commitment solidifying promise firming pledge cementing vow concretizing oath stabilizing guarantee securing assurance ensuring certainty establishing surety fixing warranty settling voucher determining undertaking deciding indemnity resolving agreement concluding arrangement finishing understanding completing comprehension ending grasp closing grip terminating hold finalizing handle wrapping clutch packing grabbing packaging seizing bundling taking grouping collecting gathering accumulating amassing compiling aggregating assembling concentrating consolidating">K-pop Sample 🎻</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section (displays after classification) -->
+                <div id="results-section" style="display: none;">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5>Classification Results</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <h3>Predicted Genre: <span id="predicted-genre" class="badge bg-primary"></span></h3>
+                                <div id="genre-icon" class="mt-2"></div>
+                            </div>
+                            <h5>Individual Model Predictions:</h5>
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Random Forest
+                                    <span id="rf-prediction" class="badge bg-secondary"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Gradient Boosting
+                                    <span id="gb-prediction" class="badge bg-secondary"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Logistic Regression
+                                    <span id="lr-prediction" class="badge bg-secondary"></span>
+                                </li>
+                            </ul>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary" id="classify-new">Classify New Lyrics</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart moved to right side -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5>Genre Probability Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="pie-chart"></canvas>
+                            </div>
+                            <div class="mt-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="chart-type" id="pie-chart-radio" value="pie" checked>
+                                    <label class="form-check-label" for="pie-chart-radio">Pie Chart</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="chart-type" id="bar-chart-radio" value="bar">
+                                    <label class="form-check-label" for="bar-chart-radio">Bar Chart</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="chart-type" id="radar-chart-radio" value="radar">
+                                    <label class="form-check-label" for="radar-chart-radio">Radar Chart</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading and Error messages -->
+                <div class="card mb-4" id="loading-card" style="display: none;">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5>Analyzing lyrics...</h5>
+                        <p class="text-muted">This may take a few moments</p>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm mb-4" id="error-card" style="display: none;">
+                    <div class="card-header bg-danger text-white">
+                        <h5>Error</h5>
+                    </div>
+                    <div class="card-body">
+                        <p id="error-message"></p>
+                        <button id="try-again" class="btn btn-outline-danger">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for How It Works details -->
+    <div class="modal fade" id="howItWorksModal" tabindex="-1" aria-labelledby="howItWorksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="howItWorksModalLabel">How the Music Genre Classifier Works</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>1. Text Processing</h6>
+                        <p>When you submit lyrics, our system first cleans and preprocesses the text:</p>
+                        <ul>
+                            <li>Removes special characters and formatting</li>
+                            <li>Converts to lowercase for consistent analysis</li>
+                            <li>Tokenizes the text (breaks into individual words)</li>
+                            <li>Removes common stopwords that don't carry genre-specific information</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>2. Feature Extraction</h6>
+                        <p>Next, we extract meaningful features from the lyrics:</p>
+                        <ul>
+                            <li>TF-IDF vectorization to identify important words</li>
+                            <li>Text length and complexity metrics</li>
+                            <li>Sentiment analysis scores</li>
+                            <li>Year-based temporal features (if provided)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>3. Machine Learning Models</h6>
+                        <p>The processed data is then analyzed by three different ML models:</p>
+                        <ul>
+                            <li><strong>Random Forest:</strong> Effective for capturing complex patterns</li>
+                            <li><strong>Gradient Boosting:</strong> Specializes in difficult-to-classify cases</li>
+                            <li><strong>Logistic Regression:</strong> Provides baseline probabilities</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>4. Ensemble Prediction</h6>
+                        <p>Finally, we combine the predictions using a weighted voting system:</p>
+                        <ul>
+                            <li>Random Forest: 40% weight</li>
+                            <li>Gradient Boosting: 35% weight</li>
+                            <li>Logistic Regression: 25% weight</li>
+                        </ul>
+                        <p>This ensemble approach produces more accurate and robust genre predictions than any single model.</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0"><strong>Dataset Information:</strong> Our models were trained on the Mendeley music dataset containing lyrics from 8 major genres: Rock, Pop, Hip Hop, Country, Jazz, Blues, Reggae and K-pop.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Music Genre Classification System using Machine Learning</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
